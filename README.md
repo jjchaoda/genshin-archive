@@ -1,5 +1,10 @@
 # 提瓦特档案 · 原神资料站
 
+> 🌐 **在线预览（GitHub Pages）**：<https://jjchaoda.github.io/genshin-archive/>
+> 📦 **仓库地址**：<https://github.com/jjchaoda/genshin-archive>
+>
+> 在线版与本地版内容完全一致（index.html 逐字节相同），localStorage 在 `https://` 下同样可用。
+
 一个纯前端（HTML + CSS + JavaScript，零依赖、零构建）的《原神》资料页面，展示：
 
 - 🎬 **实机影像馆**：官方版本 PV、角色演示、剧情 CG、实机演示、音乐会等，支持 Bilibili / YouTube 双源内嵌播放
