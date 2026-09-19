@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>弹层可用性检测 · 提瓦特档案</title>
+<style>
+  body{margin:0;padding:28px 32px;background:#0b1020;color:#ece5d8;
+       font-family:"Microsoft YaHei",system-ui,sans-serif}
+  h1{font-size:22px;margin:0 0 6px;color:#f0d9a8}
+  p.sub{margin:0 0 18px;color:#b9b2a4;font-size:13px}
+  ol{margin:0;padding-left:24px;line-height:2;font-size:15px}
+  li.ok{color:#8be28b}
+  li.bad{color:#ff8a6a}
+  #summary{margin-top:20px;font-size:26px;font-weight:700}
+  iframe{position:absolute;left:-20px;top:-20px;width:2px;height:2px;opacity:0;border:0}
+</style>
+</head>
+<body>
+<h1>提瓦特档案 · 弹层可用性检测（真实浏览器引擎）</h1>
+<p class="sub">将 index.html 载入同源 iframe，用真实事件驱动「打开 → 遮罩关闭 → ✕ 关闭 → ESC 关闭」，并读取 getComputedStyle 判定是否真正不可见。</p>
+<ol id="log"></ol>
+<div id="summary">检测中…</div>
+<iframe id="f" src="../index.html" title="被测页面"></iframe>
+
+<script>
+const log = (text, ok) => {
+  const li = document.createElement('li');
+  li.className = ok ? 'ok' : 'bad';
+  li.textContent = (ok ? 'PASS  ' : 'FAIL  ') + text;
+  document.getElementById('log').appendChild(li);
+};
+const f = document.getElementById('f');
+
+f.addEventListener('load', () => setTimeout(() => {
+  const d = f.contentDocument, w = f.contentWindow;
+  const modal = d.getElementById('playerModal');
+  const disp = () => w.getComputedStyle(modal).display;
+  const click = (el) => el.dispatchEvent(new w.MouseEvent('click', { bubbles: true, cancelable: true }));
+
+  // 1) 首屏状态：弹层必须真正不可见（这正是「弹窗关不掉」的根因所在）
+  log('页面加载后弹层不可见（computed display = ' + disp() + '）', disp() === 'none');
+  log('弹层位于 DOM 中且带 hidden 属性', !!modal && modal.hidden === true);
+
+  const first = d.querySelector('[data-play]');
+  log('影像卡片渲染成功（找到播放按钮）', !!first);
+  log('卡片封面图已注入：' + (d.querySelector('.vthumb img.vposter') ? '是' : '否'), !!d.querySelector('.vthumb img.vposter'));
+
+  // 2) 打开弹层
+  click(first);
+  setTimeout(() => {
+    log('点击卡片后弹层显示（display = ' + disp() + '）', disp() !== 'none' && modal.hidden === false);
+    const frame = d.querySelector('#playerFrame iframe');
+    log('播放器 iframe 已注入：' + (frame ? String(frame.getAttribute('src')).slice(0, 58) + '…' : '无'), !!frame);
+    log('打开时锁定页面滚动', d.body.style.overflow === 'hidden');
+
+    // 3) 点遮罩关闭
+    click(d.querySelector('.modal-mask'));
+    setTimeout(() => {
+      log('点击遮罩后关闭（display = ' + disp() + '）', disp() === 'none' && modal.hidden === true);
+      log('关闭后恢复页面滚动', d.body.style.overflow === '');
+      log('关闭后清空 iframe（停止播放）', d.getElementById('playerFrame').innerHTML === '');
+
+      // 4) 再开一次，点 ✕ 关闭
+      click(d.querySelector('[data-play]'));
+      setTimeout(() => {
+        log('二次打开成功（display = ' + disp() + '）', disp() !== 'none');
+        click(d.querySelector('.icon-btn[data-close]'));
+        setTimeout(() => {
+          log('点击 ✕ 后关闭（display = ' + disp() + '）', disp() === 'none');
+
+          // 5) 再开一次，按 ESC 关闭
+          click(d.querySelector('[data-play]'));
+          setTimeout(() => {
+            d.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+            setTimeout(() => {
+              log('按 ESC 后关闭（display = ' + disp() + '）', disp() === 'none');
+
+              // 6) 顺带检查主要板块是否都渲染出来了
+              const counts = {
+                '影像卡片': d.querySelectorAll('.vcard').length,
+                '版本条目': d.querySelectorAll('.titem').length,
+                '获奖卡片': d.querySelectorAll('.acard').length,
+                '地区卡片': d.querySelectorAll('.rcard').length,
+                '里程碑卡片': d.querySelectorAll('.mcard').length
+              };
+              Object.keys(counts).forEach((k) => log('渲染 ' + k + '：' + counts[k] + ' 条', counts[k] > 0));
+              const navEmpty = d.querySelectorAll('#heroStats li').length;
+              log('首屏统计数字渲染：' + navEmpty + ' 项', navEmpty >= 4);
+
+              const bad = document.querySelectorAll('#log li.bad').length;
+              const all = document.querySelectorAll('#log li').length;
+              const s = document.getElementById('summary');
+              s.textContent = bad ? ('✘ ' + bad + ' / ' + all + ' 项未通过') : ('✔ 全部 ' + all + ' 项通过');
+              s.style.color = bad ? '#ff8a6a' : '#8be28b';
+              document.title = '检测完成 ' + (bad ? 'FAIL' : 'PASS');
+            }, 180);
+          }, 420);
+        }, 180);
+      }, 420);
+    }, 180);
+  }, 520);
+}, 700));
+</script>
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>提瓦特档案 · 原神实机影像 / 里程碑 / 获奖记录</title>
+<meta name="description" content="原神(Genshin Impact)资料站：官方实机影像、版本里程碑时间线、获奖记录、运营数据与个人收藏笔记，数据保存在浏览器本地存储。">
+<link rel="preconnect" href="https://player.bilibili.com">
+<link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23d3bc8e'/%3E%3Ctext x='32' y='46' font-size='40' text-anchor='middle' fill='%232a2216' font-family='sans-serif'%3E%E5%8E%9F%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<canvas id="starfield" aria-hidden="true"></canvas>
+
+<!-- ============ 导航 ============ -->
+<header class="topbar" id="topbar">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="#hero">
+      <span class="brand-mark">原</span>
+      <span class="brand-text">
+        <strong>提瓦特档案</strong>
+        <small>Genshin Impact Archive</small>
+      </span>
+    </a>
+    <nav class="nav" id="nav">
+      <a href="#videos" class="nav-link">实机影像</a>
+      <a href="#versions" class="nav-link">版本里程碑</a>
+      <a href="#awards" class="nav-link">获奖记录</a>
+      <a href="#stats" class="nav-link">数据里程碑</a>
+      <a href="#regions" class="nav-link">提瓦特七国</a>
+      <a href="#library" class="nav-link">我的档案</a>
+    </nav>
+    <div class="topbar-actions">
+      <button class="icon-btn" id="themeToggle" title="切换明暗主题" aria-label="切换主题">🌙</button>
+      <button class="icon-btn menu-btn" id="menuToggle" title="菜单" aria-label="展开菜单">☰</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<!-- ============ 首屏 ============ -->
+<section id="hero" class="hero">
+  <div class="wrap hero-inner">
+    <p class="eyebrow" id="heroEyebrow">Loading…</p>
+    <h1 class="hero-title">
+      <span class="grad">原神</span> · 提瓦特档案
+    </h1>
+    <p class="hero-sub">
+      汇聚《原神》官方实机影像、版本里程碑与全球获奖记录。<br>
+      收藏、评分与笔记保存在你的浏览器本地存储中，刷新与重开都不会丢失。
+    </p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="#videos">▶ 观看实机影像</a>
+      <a class="btn btn-ghost" href="#versions">查看版本时间线</a>
+    </div>
+    <ul class="hero-stats" id="heroStats"></ul>
+    <p class="hero-note" id="heroNote"></p>
+  </div>
+  <div class="hero-glow" aria-hidden="true"></div>
+</section>
+
+<!-- ============ 实机影像 ============ -->
+<section id="videos" class="section">
+  <div class="wrap">
+    <header class="sec-head">
+      <div>
+        <p class="eyebrow">Gameplay &amp; Official Footage</p>
+        <h2>实机影像馆</h2>
+        <p class="sec-desc">收录官方版本 PV、角色演示、剧情 CG 与实机演示。点击卡片即可内嵌播放（B 站 / YouTube 双源），支持收藏、评分与笔记。</p>
+      </div>
+      <div class="sec-tools">
+        <input type="search" id="videoSearch" class="input" placeholder="搜索标题 / 版本 / 关键词…" aria-label="搜索影像">
+        <select id="videoSort" class="input" aria-label="排序">
+          <option value="version-desc">按版本（新→旧）</option>
+          <option value="version-asc">按版本（旧→新）</option>
+          <option value="rating">按我的评分</option>
+          <option value="title">按标题</option>
+        </select>
+        <label class="switch">
+          <input type="checkbox" id="onlyFav">
+          <span>仅看收藏</span>
+        </label>
+      </div>
+    </header>
+
+    <div class="chips" id="videoFilters" role="tablist" aria-label="影像类型筛选"></div>
+
+    <div class="card-grid" id="videoGrid"></div>
+    <p class="empty" id="videoEmpty" hidden>没有匹配的影像，换个关键词或清除筛选试试。</p>
+
+    <details class="panel add-panel">
+      <summary>＋ 添加自定义影像（保存在本地）</summary>
+      <form id="addVideoForm" class="form-grid">
+        <label>标题<input class="input" name="title" required placeholder="例如：我的深渊 12 层实机录像"></label>
+        <label>类型
+          <select class="input" name="type">
+            <option>实机演示</option><option>版本PV</option><option>角色演示</option>
+            <option>剧情CG</option><option>音乐会</option><option>玩家录像</option>
+          </select>
+        </label>
+        <label>版本 / 年份<input class="input" name="version" placeholder="例如 5.0 或 2024"></label>
+        <label>Bilibili 链接或 BV 号<input class="input" name="bilibili" placeholder="BV1pk4y1172e 或完整链接"></label>
+        <label>YouTube 链接或 ID<input class="input" name="youtube" placeholder="https://youtu.be/xxxx 或 11 位 ID"></label>
+        <label>备注<input class="input" name="note" placeholder="可选"></label>
+        <div class="form-actions"><button class="btn btn-primary" type="submit">添加影像</button></div>
+      </form>
+    </details>
+
+    <div class="official-links">
+      <span>官方影像来源：</span>
+      <a class="btn btn-ghost" href="https://space.bilibili.com/401742377" target="_blank" rel="noopener">Bilibili · 原神官方</a>
+      <a class="btn btn-ghost" href="https://www.youtube.com/@GenshinImpact" target="_blank" rel="noopener">YouTube · Genshin Impact</a>
+      <a class="btn btn-ghost" href="https://ys.mihoyo.com/" target="_blank" rel="noopener">官网 ys.mihoyo.com</a>
+      <a class="btn btn-ghost" href="https://genshin.hoyoverse.com/zh-cn/home" target="_blank" rel="noopener">HoYoverse 国际服</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 版本里程碑 ============ -->
+<section id="versions" class="section alt">
+  <div class="wrap">
+    <header class="sec-head">
+      <div>
+        <p class="eyebrow">Version Milestones</p>
+        <h2>版本里程碑时间线</h2>
+        <p class="sec-desc">从 2020 年 9 月 28 日公测至今的每一次大版本更新。点击版本卡可标记「已回顾」，状态会保存在本地。</p>
+      </div>
+      <div class="sec-tools">
+        <input type="search" id="versionSearch" class="input" placeholder="搜索版本号 / 名称 / 内容…" aria-label="搜索版本">
+        <select id="versionEra" class="input" aria-label="按纪元筛选">
+          <option value="all">全部纪元</option>
+          <option value="1">1.x 蒙德·璃月</option>
+          <option value="2">2.x 稻妻</option>
+          <option value="3">3.x 须弥</option>
+          <option value="4">4.x 枫丹</option>
+          <option value="5">5.x 纳塔</option>
+          <option value="6">6.x 挪德卡莱</option>
+          <option value="7">7.x</option>
+        </select>
+        <label class="switch"><input type="checkbox" id="onlyReviewed"><span>仅看已回顾</span></label>
+      </div>
+    </header>
+    <div class="progress-wrap" id="versionProgress"></div>
+    <div class="timeline" id="versionTimeline"></div>
+    <p class="empty" id="versionEmpty" hidden>没有匹配的版本。</p>
+  </div>
+</section>
+
+<!-- ============ 获奖记录 ============ -->
+<section id="awards" class="section">
+  <div class="wrap">
+    <header class="sec-head">
+      <div>
+        <p class="eyebrow">Awards &amp; Nominations</p>
+        <h2>获奖记录</h2>
+        <p class="sec-desc">按年份整理的奖项、主办方与结果。收藏喜欢的奖项，数据写入本地存储。</p>
+      </div>
+      <div class="sec-tools">
+        <input type="search" id="awardSearch" class="input" placeholder="搜索奖项 / 主办方…" aria-label="搜索奖项">
+        <select id="awardResult" class="input" aria-label="按结果筛选">
+          <option value="all">全部结果</option>
+          <option value="获奖">仅获奖</option>
+          <option value="提名">仅提名</option>
+        </select>
+      </div>
+    </header>
+    <div class="chips" id="awardYears" aria-label="年份筛选"></div>
+    <div class="award-grid" id="awardGrid"></div>
+    <p class="empty" id="awardEmpty" hidden>没有匹配的奖项。</p>
+  </div>
+</section>
+
+<!-- ============ 数据里程碑 ============ -->
+<section id="stats" class="section alt">
+  <div class="wrap">
+    <header class="sec-head">
+      <div>
+        <p class="eyebrow">By the Numbers</p>
+        <h2>数据里程碑</h2>
+        <p class="sec-desc">上线时间、平台、收入与玩家规模的关键节点（口径与来源见卡片脚注）。</p>
+      </div>
+    </header>
+    <div class="counter-grid" id="counterGrid"></div>
+    <div class="milestone-grid" id="milestoneGrid"></div>
+  </div>
+</section>
+
+<!-- ============ 提瓦特七国 ============ -->
+<section id="regions" class="section">
+  <div class="wrap">
+    <header class="sec-head">
+      <div>
+        <p class="eyebrow">The Seven Nations</p>
+        <h2>提瓦特七国</h2>
+        <p class="sec-desc">七位执政神、七种元素、七段旅程。</p>
+      </div>
+    </header>
+    <div class="region-grid" id="regionGrid"></div>
+  </div>
+</section>
+
+<!-- ============ 我的档案 ============ -->
+<section id="library" class="section alt">
+  <div class="wrap">
+    <header class="sec-head">
+      <div>
+        <p class="eyebrow">Local Archive</p>
+        <h2>我的档案</h2>
+        <p class="sec-desc">以下全部内容保存在 <code>localStorage</code>：收藏的影像与奖项、评分笔记、已回顾版本、观影历史、主题偏好。刷新、关闭浏览器再打开都会保留。</p>
+      </div>
+      <div class="sec-tools">
+        <button class="btn btn-ghost" id="exportBtn">导出 JSON 备份</button>
+        <label class="btn btn-ghost file-btn">导入备份<input type="file" id="importFile" accept="application/json,.json" hidden></label>
+        <button class="btn btn-danger" id="clearBtn">清空本地数据</button>
+      </div>
+    </header>
+
+    <div class="lib-grid">
+      <article class="panel">
+        <h3>⭐ 收藏的影像 <span class="badge" id="favVideoCount">0</span></h3>
+        <ul class="lib-list" id="favVideoList"></ul>
+      </article>
+      <article class="panel">
+        <h3>🏆 收藏的奖项 <span class="badge" id="favAwardCount">0</span></h3>
+        <ul class="lib-list" id="favAwardList"></ul>
+      </article>
+      <article class="panel">
+        <h3>📝 我的笔记</h3>
+        <ul class="lib-list" id="noteList"></ul>
+        <form id="noteForm" class="note-form">
+          <input class="input" id="noteTitle" placeholder="笔记标题（可选）">
+          <textarea class="input" id="noteBody" rows="3" placeholder="写下你的版本回忆、抽卡记录或对影像的感想…" required></textarea>
+          <button class="btn btn-primary" type="submit">保存笔记</button>
+        </form>
+      </article>
+      <article class="panel">
+        <h3>🕘 最近观看 <span class="badge" id="historyCount">0</span></h3>
+        <ul class="lib-list" id="historyList"></ul>
+      </article>
+      <article class="panel">
+        <h3>⚙️ 本地数据概览</h3>
+        <ul class="lib-list" id="storageList"></ul>
+        <p class="hint">键名前缀 <code>gi_archive_v1</code>。数据只存在于当前浏览器，不会上传到任何服务器。</p>
+      </article>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>本站为粉丝向资料整理页面，影像以官方平台内嵌播放形式呈现，所有商标与内容版权归 <strong>米哈游 / HoYoverse</strong> 所有。</p>
+    <p class="tiny" id="footerMeta"></p>
+  </div>
+</footer>
+
+<!-- ============ 播放器弹层 ============ -->
+<div class="modal" id="playerModal" hidden>
+  <div class="modal-mask" data-close></div>
+  <div class="modal-body" role="dialog" aria-modal="true" aria-labelledby="playerTitle">
+    <header class="modal-head">
+      <div>
+        <h3 id="playerTitle">—</h3>
+        <p class="tiny" id="playerMeta"></p>
+      </div>
+      <button class="icon-btn" data-close aria-label="关闭">✕</button>
+    </header>
+    <div class="player-tabs" id="playerTabs"></div>
+    <div class="player-frame" id="playerFrame"></div>
+    <div class="modal-foot">
+      <div class="rate" id="playerRate" aria-label="评分"></div>
+      <button class="btn btn-ghost" id="playerFav">☆ 收藏</button>
+      <a class="btn btn-ghost" id="playerExternal" target="_blank" rel="noopener">↗ 原站观看</a>
+    </div>
+    <div class="modal-note">
+      <textarea class="input" id="playerNote" rows="2" placeholder="为这条影像写点笔记，自动保存…"></textarea>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
