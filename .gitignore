@@ -1,0 +1,15 @@
+# 系统 / 编辑器
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.log
+
+# 依赖与临时文件
+node_modules/
+.tmp/
+tmp/
+*.tmp
+.tmp-chrome/
+.tmp-*.png
